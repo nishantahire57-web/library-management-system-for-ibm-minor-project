@@ -1,0 +1,110 @@
+"""
+Library Management System
+A simple console program to add, issue, return and view books.
+"""
+
+FREE_DAYS = 7       # a book can be kept for 7 days without any fine
+FINE_PER_DAY = 5    # Rs. per extra day
+
+# Each book is a dictionary. issued_to is None when the book is available.
+books = [
+    {"id": 1, "title": "Python Crash Course", "author": "Eric Matthes", "issued_to": None},
+    {"id": 2, "title": "Let Us C", "author": "Yashavant Kanetkar", "issued_to": None},
+    {"id": 3, "title": "Digital Design", "author": "Morris Mano", "issued_to": None},
+    {"id": 4, "title": "Engineering Physics", "author": "H. K. Malik", "issued_to": None},
+]
+
+
+def get_number(message):
+    """Keep asking until the user enters a valid whole number."""
+    while True:
+        value = input(message).strip()
+        if value.isdigit():
+            return int(value)
+        print("Please enter a valid number.")
+
+
+def find_book(book_id):
+    """Return the book with the given id, or None if not found."""
+    for book in books:
+        if book["id"] == book_id:
+            return book
+    return None
+
+
+def add_book():
+    title = input("Enter book title: ").strip().title()
+    author = input("Enter author name: ").strip().title()
+    new_id = max(book["id"] for book in books) + 1 if books else 1
+    books.append({"id": new_id, "title": title, "author": author, "issued_to": None})
+    print(f"\nBook added with ID {new_id}.")
+
+
+def issue_book():
+    book = find_book(get_number("Enter book ID to issue: "))
+    if book is None:
+        print("\nBook not found.")
+    elif book["issued_to"] is not None:
+        print(f"\nSorry, this book is already issued to {book['issued_to']}.")
+    else:
+        student = input("Enter student name: ").strip().title()
+        book["issued_to"] = student
+        print(f"\n'{book['title']}' issued to {student} for {FREE_DAYS} days.")
+
+
+def return_book():
+    book = find_book(get_number("Enter book ID to return: "))
+    if book is None:
+        print("\nBook not found.")
+    elif book["issued_to"] is None:
+        print("\nThis book was not issued.")
+    else:
+        days = get_number("How many days was the book kept? ")
+        extra_days = max(0, days - FREE_DAYS)
+        fine = extra_days * FINE_PER_DAY
+
+        print(f"\n'{book['title']}' returned by {book['issued_to']}.")
+        if fine > 0:
+            print(f"Late by {extra_days} day(s). Fine: Rs. {fine}")
+        else:
+            print("Returned on time. No fine.")
+        book["issued_to"] = None
+
+
+def show_books():
+    print("\nID | Title                    | Author               | Status")
+    print("-" * 70)
+    for book in books:
+        if book["issued_to"]:
+            status = f"Issued to {book['issued_to']}"
+        else:
+            status = "Available"
+        print(f"{book['id']:<2} | {book['title']:<24} | {book['author']:<20} | {status}")
+
+
+def main():
+    print("=== Welcome to Library Management System ===")
+    while True:
+        print("\n1. Add a book")
+        print("2. Issue a book")
+        print("3. Return a book")
+        print("4. View all books")
+        print("5. Exit")
+        choice = input("Enter your choice (1-5): ").strip()
+
+        if choice == "1":
+            add_book()
+        elif choice == "2":
+            issue_book()
+        elif choice == "3":
+            return_book()
+        elif choice == "4":
+            show_books()
+        elif choice == "5":
+            print("Thank you! Goodbye.")
+            break
+        else:
+            print("\nInvalid choice, please try again.")
+
+
+main()
